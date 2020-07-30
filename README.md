@@ -1,8 +1,6 @@
-# Twitter_Clone
-A full stack web application that is a clone of twitter.
+# Reverse_Shell
+A reverse shell that was based on my a project I did for my college cybersecuirty course.
+It allows a central server to issue shell commands to multiple client machines.
+This tool allows convienient remote access to multiple computers over the internet.
 
-# .env config file
-Download nodejs and configure the settings in .env in the /Back_End/app_compoents/.env. Instructions are in the .env file.
-
-# Running the app
-To run, the current working directory must be in the Back_End directory and you must execute the server using the node ./bin/www command 
+Dislaimer: Author does not claim responsibility for any misuse. Unathorize access to any computer systems is against the law and the author of this software does not condone such conducts. 
